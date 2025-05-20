@@ -309,6 +309,12 @@ def fontFormat():
     sizeListbox.bind("<ButtonRelease-1>", fontSizeChange)
     styleListbox.bind("<ButtonRelease-1>", fontStyleChange)
 
+def toggleWordWrap():
+    if wordWrapVar.get():
+        mainTextField.config(wrap="word")
+    else:
+        mainTextField.config(wrap="none")
+
 def helpView():
     webbrowser.open(helpurl)
 
@@ -365,6 +371,7 @@ if fileCheck("pynote_icon.ico"):
 else:
     print("No pynote_icon.ico file found.")
     pass
+wordWrapVar = BooleanVar(value=True)
 ##################################################
 
 # buttons for no context menubar notepad -- legacy code (v0.1 build 85)
@@ -410,6 +417,7 @@ editMenu.add_command(label="Paste", accelerator="Ctrl+V", command=pasteEdit)
 # format context menu in menu bar
 formatMenu = Menu(menubar,tearoff=False)
 menubar.add_cascade(label="Format", menu=formatMenu)
+formatMenu.add_checkbutton(label="Word Wrap", variable=wordWrapVar, command=toggleWordWrap)
 formatMenu.add_command(label="Font...", command=fontFormat)
 
 # help context menu in menu bar
@@ -420,11 +428,16 @@ helpMenu.add_separator()
 helpMenu.add_command(label="About PyNote", command=about)
 
 # text window scrollbar
-scrollbar = Scrollbar(mainWindow)
-scrollbar.pack(side="right", fill="y")
+xScrollbar = Scrollbar(mainWindow, orient="horizontal")
+xScrollbar.pack(side="bottom", fill="x")
+
+yScrollbar = Scrollbar(mainWindow, orient="vertical")
+yScrollbar.pack(side="right", fill="y")
+
+
 
 # text window
-mainTextField = Text(mainWindow, font=currentFont, wrap="word", undo=True, yscrollcommand=scrollbar.set)
+mainTextField = Text(mainWindow, font=currentFont, wrap="word", undo=True, yscrollcommand=yScrollbar.set, xscrollcommand=xScrollbar.set)
 mainTextField.pack(side="top", expand=True, fill="both")
 mainTextField.bind("<<Modified>>", on_edit)
 mainTextField.bind("<Control-z>", lambda e: undoEdit())
@@ -454,5 +467,7 @@ mainTextField.bind("<ButtonRelease>", update_cursor_position)
 
 
 # window loop
+xScrollbar.config(command=mainTextField.xview)
+yScrollbar.config(command=mainTextField.yview)
 update_cursor_position()
 mainWindow.mainloop()
